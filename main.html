@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Randomizer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ENjdO4Dr2bkBIFxQpeoA6VZ6bNQZl1fi7Fj/1cvUj1yY5q+OrCXaRkfj" crossorigin="anonymous">
+  <style>
+    body { padding-top: 50px; }
+    #results { margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="text-center mb-4">Team Randomizer</h1>
+    <form id="configForm" class="mb-3">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="numPlayers" class="form-label">Number of Players</label>
+          <input type="number" class="form-control" id="numPlayers" min="1" required>
+        </div>
+        <div class="col-md-6">
+          <label for="numTeams" class="form-label">Number of Teams</label>
+          <input type="number" class="form-control" id="numTeams" min="1" required>
+        </div>
+      </div>
+      <button type="button" id="generateFields" class="btn btn-primary mt-3">Set Players</button>
+    </form>
+
+    <form id="namesForm" class="d-none">
+      <div id="namesContainer" class="mb-3"></div>
+      <button type="button" id="randomizeBtn" class="btn btn-success">Randomize Teams</button>
+    </form>
+
+    <div id="results"></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const generateFieldsBtn = document.getElementById('generateFields');
+      const namesForm = document.getElementById('namesForm');
+      const namesContainer = document.getElementById('namesContainer');
+      const randomizeBtn = document.getElementById('randomizeBtn');
+      const resultsDiv = document.getElementById('results');
+
+      generateFieldsBtn.addEventListener('click', () => {
+        const numPlayers = parseInt(document.getElementById('numPlayers').value);
+        const numTeams = parseInt(document.getElementById('numTeams').value);
+        resultsDiv.innerHTML = ''; // clear previous results
+
+        if (isNaN(numPlayers) || isNaN(numTeams) || numPlayers < 1 || numTeams < 1) {
+          alert('Please enter valid numbers for players and teams.');
+          return;
+        }
+        if (numTeams > numPlayers) {
+          alert('Number of teams cannot exceed number of players.');
+          return;
+        }
+
+        // clear any existing name fields
+        namesContainer.innerHTML = '';
+
+        // generate input fields for player names
+        for (let i = 1; i <= numPlayers; i++) {
+          const div = document.createElement('div');
+          div.className = 'mb-2';
+          div.innerHTML = `
+            <label for="player${i}" class="form-label">Player ${i} Name</label>
+            <input type="text" class="form-control" id="player${i}" placeholder="Enter name" required>
+          `;
+          namesContainer.appendChild(div);
+        }
+
+        // show the names form
+        namesForm.classList.remove('d-none');
+      });
+
+      randomizeBtn.addEventListener('click', () => {
+        const numTeams = parseInt(document.getElementById('numTeams').value);
+        const numPlayers = parseInt(document.getElementById('numPlayers').value);
+
+        // collect names
+        const names = [];
+        for (let i = 1; i <= numPlayers; i++) {
+          const input = document.getElementById(`player${i}`);
+          if (input.value.trim() === '') {
+            alert(`Please enter a name for player ${i}.`);
+            return;
+          }
+          names.push(input.value.trim());
+        }
+
+        // shuffle (Fisher-Yates)
+        for (let i = names.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [names[i], names[j]] = [names[j], names[i]];
+        }
+
+        // distribute into teams
+        const teams = [];
+        const baseSize = Math.floor(names.length / numTeams);
+        let remainder = names.length % numTeams;
+        let index = 0;
+
+        for (let t = 0; t < numTeams; t++) {
+          const size = baseSize + (remainder > 0 ? 1 : 0);
+          const teamMembers = names.slice(index, index + size);
+          teams.push(teamMembers);
+          index += size;
+          if (remainder > 0) remainder--;
+        }
+
+        // display results
+        resultsDiv.innerHTML = '<h2>Team Assignments:</h2>';
+        teams.forEach((team, idx) => {
+          const list = document.createElement('ul');
+          list.className = 'list-group mb-3';
+          team.forEach(member => {
+            const item = document.createElement('li');
+            item.className = 'list-group-item';
+            item.textContent = member;
+            list.appendChild(item);
+          });
+          const title = document.createElement('h5');
+          title.textContent = `Team ${idx + 1}`;
+          resultsDiv.appendChild(title);
+          resultsDiv.appendChild(list);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
