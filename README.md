@@ -4,7 +4,7 @@ A lightweight, browser-based tool to randomly assign players into teams. Built w
 
 ## Demo
 
-View it live via GitHub Pages: [Eisen9.github.io/team-randomizer](https://github.com/Eisen9/team-randomizer)
+View it live via GitHub Pages: [Eisen9.github.io/team-randomizer](https://eisen9.github.io/team-randomizer/)
 
 ## Features
 
